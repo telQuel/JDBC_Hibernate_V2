@@ -2,8 +2,10 @@ package jm.task.core.jdbc.util;
 
 import jm.task.core.jdbc.model.User;
 import org.hibernate.SessionFactory;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
+import org.hibernate.service.ServiceRegistry;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -38,14 +40,16 @@ public class Util {
     }
 
 
-    private static final SessionFactory sessionFactory = buildSessionFactory();
-
     private Util() {
     }
 
-    private static SessionFactory buildSessionFactory() {
+    public static SessionFactory sessionFactory;
+
+    public static SessionFactory getSessionFactory() {
         try {
+            Configuration configuration = new Configuration();
             Properties properties = new Properties();
+
             properties.put(Environment.DRIVER, "com.mysql.jdbc.Driver");
             properties.put(Environment.URL, "jdbc:mysql://localhost:3306/ex_jdbc?serverTimezone=UTC&useSSL=false");
             properties.put(Environment.USER, "****");
@@ -56,13 +60,15 @@ public class Util {
             properties.put(Environment.CURRENT_SESSION_CONTEXT_CLASS, "thread");
             properties.put(Environment.POOL_SIZE, "10");
 
-            return new Configuration().setProperties(properties).addAnnotatedClass(User.class).buildSessionFactory();
+            configuration.setProperties(properties);
+            configuration.addAnnotatedClass(User.class);
+
+            sessionFactory = configuration.buildSessionFactory();
+
+            return sessionFactory;
         } catch (Exception e) {
             throw new ExceptionInInitializerError(e.getMessage());
         }
     }
 
-    public static SessionFactory getSessionFactory() {
-        return sessionFactory;
-    }
 }
